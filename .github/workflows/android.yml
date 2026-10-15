@@ -22,13 +22,20 @@ jobs:
       - name: Extract project
         run: |
           unzip -o AI_Football_Analyzer_Pro_Live_Design_Project.zip -d extracted
-          find extracted -maxdepth 3 -name settings.gradle
+          test -f extracted/footballapk/settings.gradle
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android components
+        run: |
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -38,7 +45,6 @@ jobs:
       - name: Build APK
         run: |
           gradle -p extracted/footballapk assembleDebug
-          find extracted -name app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

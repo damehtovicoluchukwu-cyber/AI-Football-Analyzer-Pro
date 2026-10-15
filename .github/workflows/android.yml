@@ -2,10 +2,6 @@ name: Build AI Football Analyzer APK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'AI_Football_Analyzer_Pro_Live_Design_Project.zip'
-      - '.github/workflows/android.yml'
 
 permissions:
   contents: read
@@ -18,10 +14,15 @@ jobs:
       - name: Download repository files
         uses: actions/checkout@v4
 
-      - name: Extract app project
+      - name: Check project ZIP
         run: |
-          unzip -q AI_Football_Analyzer_Pro_Live_Design_Project.zip -d extracted
-          test -f extracted/footballapk/settings.gradle
+          ls -la
+          test -f AI_Football_Analyzer_Pro_Live_Design_Project.zip
+
+      - name: Extract project
+        run: |
+          unzip -o AI_Football_Analyzer_Pro_Live_Design_Project.zip -d extracted
+          find extracted -maxdepth 3 -name settings.gradle
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -34,11 +35,14 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Build Android APK
-        run: gradle -p extracted/footballapk assembleDebug
+      - name: Build APK
+        run: |
+          gradle -p extracted/footballapk assembleDebug
+          find extracted -name app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AI-Football-Analyzer-APK
           path: extracted/footballapk/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

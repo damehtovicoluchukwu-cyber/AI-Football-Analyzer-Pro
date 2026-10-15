@@ -1,0 +1,44 @@
+name: Build AI Football Analyzer APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'AI_Football_Analyzer_Pro_Live_Design_Project.zip'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository files
+        uses: actions/checkout@v4
+
+      - name: Extract app project
+        run: |
+          unzip -q AI_Football_Analyzer_Pro_Live_Design_Project.zip -d extracted
+          test -f extracted/footballapk/settings.gradle
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build Android APK
+        run: gradle -p extracted/footballapk assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Football-Analyzer-APK
+          path: extracted/footballapk/app/build/outputs/apk/debug/app-debug.apk
